@@ -6,44 +6,71 @@
 using namespace std;
 
 class Solution {
-public:
-    bool hasPath(vector<vector<int>>& maze, vector<int>& start, vector<int>& destination) {
-        queue<pair<int, int>> q;
-        vector<pair<int, int>> dirs = {{1,0},{0,1},{-1,0},{0,-1}};
-        q.push({start[0], start[1]});
-        int M = maze.size();
-        int N = maze[0].size();
-        vector<vector<bool>> visited(M, vector<bool>(N, false));
-        visited[start[0]][start[1]] = true;
-        while (!q.empty()) {
-            auto cur = q.front();
-            q.pop();
-            if (cur.first == destination[0] && cur.first == destination[1]) {
-                return true;
-            }
-            
-            for (auto d : dirs) {
-                int x = cur.first + d.first;
-                int y = cur.second + d.second;
-                while(x >= 0 && x < M && y >= 0 && y < N && maze[x][y] == 0) {
-                    x += d.first;
-                    y += d.second;
-                }
-                int px = x - d.first;
-                int py = y - d.second;
-                if(!visited[px][py]) {
-                    visited[px][py] = true;
-                    q.push({px, py});
-                }
-            }
+    int M, N;
+    bool dfs(vector<vector<int>>& maze, vector<vector<bool>>& visited,
+        vector<int>& cur, vector<int>& dest)
+    {
+        if (visited[cur[0]][cur[1]]) {
+            return false;
+        }
+        if ((cur[0] == dest[0]) && (cur[1] == dest[1])) {
+            return true;
+        }
+        visited[cur[0]][cur[1]] = true;
+
+        // right *
+        int r = cur[1] + 1;
+        while (r < N && maze[cur[0]][r] == 0) {
+            r++;
+        }
+        vector<int> right = {cur[0], r - 1};
+        if (dfs(maze, visited, right, dest)) {
+            return true;
+        }
+
+        // left
+        int l = cur[1] - 1;
+        while (l >= 0 && maze[cur[0]][l] == 0) {
+            l--;
+        }
+        vector<int> left = {cur[0], l + 1};
+        if (dfs(maze, visited, left, dest)) {
+            return true;
+        }
+
+        //up
+        int u = cur[0] - 1;
+        while (u >= 0 && maze[u][cur[1]] == 0) {
+            u--;
+        }
+        vector<int> up = {u + 1, cur[1]};
+        if (dfs(maze, visited, up, dest)) {
+            return true;
+        }
+
+        // down
+        int d = cur[0] + 1;
+        while (d < M && maze[d][cur[1]] == 0) {
+            d++;
+        }
+        vector<int> down = {d - 1, cur[1]};
+        if (dfs(maze, visited, down, dest)) {
+            return true;
         }
         return false;
+    }
+public:
+    bool hasPath(vector<vector<int>>& maze, vector<int>& start, vector<int>& destination) {
+        M = maze.size();
+        N = maze[0].size();
+        vector<vector<bool>> visited(M, vector<bool>(N, false));
+        return dfs(maze, visited, start, destination);
     }
 };
 
 int main()
 {
-    vector<vector<int>> maze1 = 
+    vector<vector<int>> maze1 =
     {
         {0, 0, 1, 0, 0},
         {0, 0, 0, 0, 0},
@@ -54,7 +81,7 @@ int main()
     vector<int> start1 = {0, 4};
     vector<int> destination1 = {4,4};
 
-    vector<vector<int>> maze2 = 
+    vector<vector<int>> maze2 =
     {
         {0,0,1,0,0},
         {0, 0, 0, 0, 0},
@@ -66,7 +93,7 @@ int main()
     vector<int> destination2 = {3, 2};
 
 
-    vector<vector<int>> maze3 = 
+    vector<vector<int>> maze3 =
     {
         {0,0,0,0,1,0,0},
         {0,0,1,0,0,0,0},
@@ -80,7 +107,7 @@ int main()
     };
     vector<int> start3 = {0, 0};
     vector<int> destination3 = {8, 6};
-    
+
     Solution s;
     cout<<s.hasPath(maze3, start3, destination3)<<endl;
     return 0;
